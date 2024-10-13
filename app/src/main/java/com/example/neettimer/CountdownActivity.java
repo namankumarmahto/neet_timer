@@ -56,28 +56,26 @@ public class CountdownActivity extends AppCompatActivity {
         handler.post(runnable);
     }
 
+    // Updated calculation for months and days
     private int[] calculateMonthsAndDaysLeft(Calendar currentDate, Calendar neetDate) {
-        Calendar tempCurrent = (Calendar) currentDate.clone();
+        int yearsDiff = neetDate.get(Calendar.YEAR) - currentDate.get(Calendar.YEAR);
+        int monthsDiff = neetDate.get(Calendar.MONTH) - currentDate.get(Calendar.MONTH) + (yearsDiff * 12);
+        int daysDiff;
 
-        int monthsLeft = 0;
-        int daysLeft = 0;
+        // Adjust the days difference
+        Calendar tempDate = (Calendar) currentDate.clone();
+        tempDate.add(Calendar.MONTH, monthsDiff); // Move tempDate to the same month as NEET exam
 
-        while (tempCurrent.before(neetDate)) {
-            tempCurrent.add(Calendar.MONTH, 1);
-            if (tempCurrent.before(neetDate) || tempCurrent.equals(neetDate)) {
-                monthsLeft++;
-            }
+        // If tempDate is after NEET exam date, reduce the month count by 1
+        if (tempDate.after(neetDate)) {
+            monthsDiff--;
+            tempDate.add(Calendar.MONTH, -1);
         }
 
-        tempCurrent.add(Calendar.MONTH, -1);
-        daysLeft = neetDate.get(Calendar.DAY_OF_MONTH) - tempCurrent.get(Calendar.DAY_OF_MONTH);
+        // Calculate the difference in days
+        daysDiff = (int) ((neetDate.getTimeInMillis() - tempDate.getTimeInMillis()) / (1000 * 60 * 60 * 24));
 
-        if (daysLeft < 0) {
-            daysLeft += tempCurrent.getActualMaximum(Calendar.DAY_OF_MONTH);
-            monthsLeft--;
-        }
-
-        return new int[]{monthsLeft, daysLeft};
+        return new int[]{monthsDiff, daysDiff};
     }
 
     @Override
