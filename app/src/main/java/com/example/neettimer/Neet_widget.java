@@ -1,42 +1,52 @@
 package com.example.neettimer;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.widget.RemoteViews;
 
-/**
- * Implementation of App Widget functionality.
- */
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class Neet_widget extends AppWidgetProvider {
-
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-
-        CharSequence widgetText = context.getString(R.string.appwidget_text);
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.neet_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
+
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
-    @Override
-    public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
+    private void updateWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        // Get the remaining days for NEET exam
+        int daysLeft = calculateDaysLeft();
+
+        // Update the widget layout
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.neet_widget);
+        views.setTextViewText(R.id.neet_days_left, "Days Left: " + daysLeft);
+
+        // Update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    @Override
-    public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
+    private int calculateDaysLeft() {
+        // Set the NEET exam date
+        Calendar neetDate = Calendar.getInstance();
+        neetDate.set(2025, Calendar.MAY, 4); // NEET Date
+
+        // Get the current date
+        Calendar today = Calendar.getInstance();
+
+        // Calculate the difference in days
+        long diffInMillis = neetDate.getTimeInMillis() - today.getTimeInMillis();
+        return (int) (diffInMillis / (1000 * 60 * 60 * 24));
     }
 }
